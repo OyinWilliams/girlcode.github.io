@@ -1,0 +1,64 @@
+$dbservername = "localhost";
+    $dbusername = "root";
+    $dbpassword = "";
+    $dbName = "users";
+
+    // Create connection
+    $connection = mysqli_connect($dbservername, $dbusername, $dbpassword, $dbName);
+
+    // Check connection
+    if ($connection->connect_error) {
+    die("Connection failed: " . $connection->connect_error);
+    } 
+     echo "Connected successfully";
+
+mysqli_select_db($connection, $dbName);
+
+      if (isset($_POST["submit_form"])) {
+        $fullname = mysqli_real_escape_string($connection, $_POST['fullname']);
+        $user_name = mysqli_real_escape_string($connection, $_POST['user_name']);
+        $email = mysqli_real_escape_string($connection, $_POST['email']);
+        $user_password = mysqli_real_escape_string($connection, $_POST['user_password']);
+
+    if(empty($fullname) || empty($user_name) || empty($email) || empty($password)){
+      header("Location: ../signup.php");
+      exit();
+    } else{
+        if (!preg_match("/^?[a-zA-Z]*$/", $fullname) || !preg_match("/^?[a-zA-Z]*$/", $user_name)) {
+          header("Location: ../signup.php");
+          exit();
+        } else{
+          if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            header("signup.php");
+            exit();
+          } else{
+            $sql = "SELECT * FROM registration WHERE user_name = '$user_name'";
+            $result = mysqli_query($connection, $sql);
+            $resultcheck = mysqli_num_rows($result); 
+
+            if($resultcheck > 0) {
+              header("signup.php");
+              exit();
+            } else{
+              $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+              $sql = "INSERT INTO registration (fullname,  user_name, email, user_password)
+        VALUES ('$fullname',  '$user_name', '$email', '$hashed_password')";
+        mysqli_query($conn, $sql);
+
+        header("signup.php");
+              exit();
+            }
+          }
+        }
+    }
+
+    if($connection->query($sql) === TRUE) {
+    echo "1 Record added successfully.";
+  } 
+    else{ 
+    header("Location: ../signup.php");
+  }
+}
+      mysqli_close($connection);
+  ?>
